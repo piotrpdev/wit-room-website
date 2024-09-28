@@ -15,9 +15,9 @@ export default defineConfig({
 
     manifest: {
       name: 'Free WIT Rooms',
-      short_name: 'Free WIT Rooms',
-      description: 'Check which WIT rooms are free during the week',
-      theme_color: '#ffffff',
+      short_name: 'WIT Rooms',
+      description: 'Check which rooms are free during the week',
+      theme_color: '#adb0eb',
     },
 
     workbox: {

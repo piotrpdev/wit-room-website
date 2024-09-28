@@ -1,5 +1,6 @@
 <script lang="ts">
 import { useRegisterSW } from "virtual:pwa-register/svelte";
+import { fade } from "svelte/transition";
 
 // check for updates every hour
 const period = 60 * 60 * 1000;
@@ -57,6 +58,7 @@ $: message = $offlineReady
     class="pwa-toast"
     role="alert"
     aria-labelledby="toast-message"
+    transition:fade|global={{ duration: 300 }}
   >
     <div class="message">
       <span id="toast-message">
@@ -79,7 +81,7 @@ $: message = $offlineReady
 <style>
   .pwa-toast {
     position: fixed;
-    right: 0;
+    right: 32px;
     bottom: 0;
     margin: 16px;
     padding: 12px;

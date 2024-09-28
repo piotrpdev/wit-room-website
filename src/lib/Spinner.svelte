@@ -1,8 +1,10 @@
 <script>
+import { fade } from "svelte/transition";
+
 // Taken from https://cssloaders.github.io/
 </script>
 
-<span class="loader"></span>
+<span class="loader" in:fade={{ duration: 300 }}></span>
 
 <style>
 .loader {

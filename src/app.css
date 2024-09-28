@@ -11,15 +11,22 @@
 	--spinner-color: hsl(237, 100%, 80%);
 	--dark-primary: hsl(237, 30%, 50%);
 	--secondary-background: hsl(236, 20%, 50%);
+	--secondary-background-striped: hsl(236, 20%, 46%);
 	--tertiary-background: hsl(236, 20%, 40%);
 	--muted-primary: hsl(237, 61%, 80%);
 	--more-muted-primary: hsl(237, 10%, 65%);
+	--more-more-muted-primary: hsl(237, 10%, 80%);
 	--table-border: hsl(237, 61%, 80%);
+	--table-border-highlight: hsl(237, 100%, 90%);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+html {
+	scrollbar-gutter: stable both-edges;
 }
 
 a {
@@ -81,8 +88,11 @@ button:focus-visible {
 		--spinner-background: hsl(0, 0%, 80%);
 		--spinner-color: hsl(237, 61%, 70%);
 		--secondary-background: hsl(237, 90%, 90%);
+		--secondary-background-striped: hsl(237, 90%, 88%);
 		--tertiary-background: hsl(237, 50%, 83%);
 		--more-muted-primary: hsl(237, 20%, 50%);
+		--more-more-muted-primary: hsl(237, 20%, 60%);
+		--table-border-highlight: hsl(237, 40%, 70%);
 	}
 	a:hover {
 		color: #747bff;
