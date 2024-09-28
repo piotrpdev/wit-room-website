@@ -58,7 +58,7 @@ $: message = $offlineReady
     class="pwa-toast"
     role="alert"
     aria-labelledby="toast-message"
-    transition:fade|global={{ duration: 300 }}
+    transition:fade={{ duration: 300 }}
   >
     <div class="message">
       <span id="toast-message">

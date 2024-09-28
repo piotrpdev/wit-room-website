@@ -119,16 +119,16 @@ const handleForm = async () => {
   </p>
 
   {#await initDataPromise}
-    <p transition:fade|global={{ duration: 300 }} class="small-text muted-text">Fetching initial data... (this might take a while)</p>
+    <p transition:fade={{ duration: 300 }} class="small-text muted-text">Fetching initial data... (this might take a while)</p>
     <Spinner />
   {:then initDataResult}
-    <form in:fade={{ duration: 300 }} on:submit|preventDefault={handleForm}>
+    <form in:fade={{ delay: 300, duration: 300 }} on:submit|preventDefault={handleForm}>
       <RoomFieldset allRooms={initDataResult.allRooms} bind:userChoice bind:userPattern bind:userRoom />
       <p class="small-text muted-text">(Fetching initial data took {initDataResult.fetchTime}ms)</p>
       {#await formPromise}
 	  	<QueueTable {roomQueue} />
       {:then formPromiseData}
-        <button out:fade|global={{ duration: 300 }} in:fade|global={{ delay: 300, duration: 300 }} type="submit">Find Free Rooms</button>
+        <button out:fade={{ duration: 300 }} in:fade={{ delay: 300, duration: 300 }} type="submit">Find Free Rooms</button>
 		{#if processedRoomData}
 			<ResultsTable {processedRoomData} {formPromiseData} {roomsToCheck} />
 		{/if}

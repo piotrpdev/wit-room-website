@@ -6,7 +6,7 @@ import type { RoomQueue } from "./fetchers";
 export let roomQueue: RoomQueue;
 </script>
 
-<div class="queue" out:fade|global={{ duration: 300 }} in:fade|global={{ delay: 300, duration: 300 }}>
+<div class="queue" out:fade={{ duration: 300 }} in:fade={{ delay: 300, duration: 300 }}>
     <p class="small-text muted-text">Finding free rooms... (this might take a while)</p>
             {#if Object.keys(roomQueue).length > 0}
                 <div class="table-wrapper">
