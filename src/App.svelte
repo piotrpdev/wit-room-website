@@ -112,7 +112,7 @@ const handleForm = async () => {
 </script>
 
 <main>
-  <img src={appLogo} class="logo" alt="Free WIT Rooms Logo" />
+  <img src={appLogo} class="logo" alt="Free WIT Rooms Logo" width="127" height="144" />
   <h1>Free WIT Rooms</h1>
   <p class="muted-text">
     Check which rooms are free during the week.
