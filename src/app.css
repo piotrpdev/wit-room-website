@@ -72,12 +72,62 @@ button {
 	cursor: pointer;
 	transition: border-color 0.25s;
 }
+
 button:hover {
 	border-color: var(--table-border);
 }
+
 button:focus,
 button:focus-visible {
 	outline: 4px auto -webkit-focus-ring-color;
+}
+
+button[type="submit"] {
+	margin: 16px;
+	margin-bottom: 32px;
+}
+
+table {
+	border-collapse: collapse;
+	border: 2px solid var(--table-border);
+	letter-spacing: 1px;
+	font-size: 0.8rem;
+	margin: 1em 0em;
+}
+
+td,
+th {
+	border: 1px solid var(--table-border);
+	padding: 10px 20px;
+}
+
+th {
+	background-color: var(--tertiary-background);
+}
+
+td {
+	text-align: center;
+}
+
+tr:nth-child(even) td {
+	background-color: var(--secondary-background-striped);
+}
+
+tr:nth-child(odd) td {
+	background-color: var(--secondary-background);
+}
+
+.error {
+	color: red;
+	font-size: 0.8em;
+}
+
+.muted-text {
+	color: var(--more-muted-primary);
+}
+
+.small-text {
+	font-size: 0.8em;
 }
 
 @media (prefers-color-scheme: light) {
