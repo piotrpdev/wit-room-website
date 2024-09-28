@@ -6,6 +6,7 @@
 	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
 	background-color: hsl(237, 20%, 30%);
+	--background-color: hsl(237, 20%, 30%);
 	--half-dark: hsl(237, 5%, 60%);
 	--spinner-background: hsl(0, 0%, 30%);
 	--spinner-color: hsl(237, 100%, 80%);
@@ -142,6 +143,7 @@ tr:nth-child(odd) td {
 	:root {
 		color: #213547;
 		background-color: hsl(237, 60%, 90%);
+		--background-color: hsl(237, 60%, 90%);
 		--half-dark: hsl(237, 5%, 40%);
 		--spinner-background: hsl(0, 0%, 80%);
 		--spinner-color: hsl(237, 61%, 70%);
