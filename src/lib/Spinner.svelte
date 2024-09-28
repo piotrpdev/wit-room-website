@@ -9,7 +9,7 @@
   width: 32px;
   height: 32px;
   border: 4px solid var(--spinner-background);
-  border-bottom-color: var(--primary);
+  border-bottom-color: var(--spinner-color);
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;

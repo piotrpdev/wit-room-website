@@ -5,11 +5,16 @@
 
 	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
+	background-color: hsl(237, 20%, 30%);
 	--half-dark: hsl(237, 5%, 60%);
 	--spinner-background: hsl(0, 0%, 30%);
-	--primary: hsl(237, 100%, 80%);
+	--spinner-color: hsl(237, 100%, 80%);
 	--dark-primary: hsl(237, 30%, 50%);
+	--secondary-background: hsl(236, 20%, 50%);
+	--tertiary-background: hsl(236, 20%, 40%);
+	--muted-primary: hsl(237, 61%, 80%);
+	--more-muted-primary: hsl(237, 10%, 65%);
+	--table-border: hsl(237, 61%, 80%);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -30,8 +35,6 @@ body {
 	margin: 0;
 	display: flex;
 	place-items: center;
-	min-width: 320px;
-	min-height: 100vh;
 }
 
 h1 {
@@ -44,10 +47,11 @@ h1 {
 }
 
 #app {
-	max-width: 1280px;
 	margin: 0 auto;
 	padding: 2rem;
 	text-align: center;
+	box-sizing: border-box;
+	width: 100%;
 }
 
 button {
@@ -57,12 +61,12 @@ button {
 	font-size: 1em;
 	font-weight: 500;
 	font-family: inherit;
-	background-color: var(--dark-primary);
+	background-color: var(--secondary-background);
 	cursor: pointer;
 	transition: border-color 0.25s;
 }
 button:hover {
-	border-color: #646cff;
+	border-color: var(--table-border);
 }
 button:focus,
 button:focus-visible {
@@ -72,15 +76,18 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
 	:root {
 		color: #213547;
-		background-color: #ffffff;
+		background-color: hsl(237, 60%, 90%);
 		--half-dark: hsl(237, 5%, 40%);
 		--spinner-background: hsl(0, 0%, 80%);
-		--primary: hsl(237, 100%, 60%);
+		--spinner-color: hsl(237, 61%, 70%);
+		--secondary-background: hsl(237, 90%, 90%);
+		--tertiary-background: hsl(237, 50%, 83%);
+		--more-muted-primary: hsl(237, 20%, 50%);
 	}
 	a:hover {
 		color: #747bff;
 	}
 	button {
-		background-color: hsl(237, 60%, 88%);
+		background-color: var(--tertiary-background);
 	}
 }

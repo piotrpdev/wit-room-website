@@ -4,6 +4,24 @@ import appLogo from "/favicon.svg";
 import PWABadge from "./lib/PWABadge.svelte";
 import Spinner from "./lib/Spinner.svelte";
 
+type ProcessedRoomData = {
+	errorCount: number;
+	roomsWithErrors: string[];
+	emptyTimetableCount: number;
+	freeTimesCount: number;
+	timetableCount: number;
+	freeRoomTable: Record<string, Record<string, string[]>>;
+};
+
+type TimetableState = {
+	error: boolean;
+	empty: boolean;
+	freeTimes: Record<string, string[]>;
+	date: string;
+	room: string;
+	week: string;
+};
+
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const times = [
 	"09:15",
@@ -35,6 +53,7 @@ const defaultRoomData = {
 	CboEndTime: "9",
 	BtnRetrieve: "Generate Timetable",
 };
+Object.freeze(defaultRoomData);
 
 let __VIEWSTATE = "";
 let __VIEWSTATEGENERATOR = "";
@@ -42,9 +61,15 @@ let __EVENTVALIDATION = "";
 
 let allRooms: HTMLOptionElement[] = [];
 
-// TODO: Handle errors / optional chaining
+let roomsToCheck: string[] = [];
+let formPromise: Promise<PromiseSettledResult<TimetableState>[]>;
+let processedRoomData: ProcessedRoomData;
 
 let roundedFetchInitDataDuration = 0;
+let initDataPromise: Promise<void>;
+onMount(() => {
+	initDataPromise = fetchInitData();
+});
 
 const fetchInitData = async () => {
 	console.log("Fetching initial data");
@@ -103,8 +128,6 @@ const fetchInitData = async () => {
 	console.debug(`Fetching initial data took ${roundedFetchInitDataDuration}ms`);
 };
 
-let formPromise: Promise<void>;
-
 const handleForm = async () => {
 	console.log("Handling form submission");
 	performance.mark("handleForm-start");
@@ -114,16 +137,41 @@ const handleForm = async () => {
 	) as HTMLInputElement;
 
 	switch (roomChoice.id) {
-		case "it-rooms":
+		case "it-rooms": {
 			console.log("Checking IT rooms");
-			formPromise = fetchRoomData("IT101");
+			roomsToCheck = allRooms
+				.filter((room) => room.value.startsWith("IT"))
+				.map((room) => room.value);
+			formPromise = Promise.allSettled(
+				roomsToCheck.map((room) => fetchRoomData(room)),
+			);
+			const roomData = await formPromise;
+			console.debug(roomData);
+			processedRoomData = processParsedRoomData(
+				roomData
+					.filter((room) => room.status === "fulfilled")
+					.map((room) => room.value),
+			);
+			console.debug(processedRoomData);
 			break;
+		}
 		case "use-room": {
 			const room = document.querySelector(
 				"select[name='room'] > option:checked",
 			) as HTMLInputElement;
 			console.log(`Checking specific room ${room.value}`);
-			formPromise = fetchRoomData(room.value);
+			roomsToCheck = [room.value];
+			formPromise = Promise.allSettled(
+				roomsToCheck.map((room) => fetchRoomData(room)),
+			);
+			const roomData = await formPromise;
+			console.debug(roomData);
+			processedRoomData = processParsedRoomData(
+				roomData
+					.filter((room) => room.status === "fulfilled")
+					.map((room) => room.value),
+			);
+			console.debug(processedRoomData);
 			break;
 		}
 		default:
@@ -140,6 +188,80 @@ const handleForm = async () => {
 	console.debug(
 		`Handling form submission took ${Math.round(handleFormMeasure.duration)}ms`,
 	);
+};
+
+const processParsedRoomData = (
+	parsedRoomData: TimetableState[],
+): ProcessedRoomData => {
+	console.log("Processing parsed room data");
+	performance.mark("processParsedRoomData-start");
+
+	let errorCount = 0;
+	let emptyTimetableCount = 0;
+	let freeTimesCount = 0;
+	let timetableCount = 0;
+	const roomsWithErrors: string[] = [];
+	// [Monday, Tuesday] - [17:15, 18:15] - [IT101, IT102]
+	const freeRoomTable: Record<string, Record<string, string[]>> = {};
+
+	// biome-ignore lint/complexity/noForEach: <explanation>
+	parsedRoomData.forEach((timetable) => {
+		timetableCount++;
+
+		if (timetable.error) {
+			errorCount++;
+			console.error(`Found error in timetable for room ${timetable.room}`);
+			roomsWithErrors.push(timetable.room);
+			return;
+		}
+
+		if (timetable.empty) {
+			console.debug(`Found empty timetable for room ${timetable.room}`);
+			emptyTimetableCount++;
+			return;
+		}
+
+		for (const day of days) {
+			for (const time of timetable.freeTimes[day]) {
+				freeTimesCount++;
+				if (!freeRoomTable[day]) {
+					freeRoomTable[day] = {};
+				}
+				if (!freeRoomTable[day][time]) {
+					freeRoomTable[day][time] = [];
+				}
+				freeRoomTable[day][time].push(timetable.room);
+			}
+		}
+	});
+
+	console.debug({
+		errorCount,
+		roomsWithErrors,
+		emptyTimetableCount,
+		freeTimesCount,
+		timetableCount,
+		freeRoomTable,
+	});
+
+	performance.mark("processParsedRoomData-end");
+	const processParsedRoomDataMeasure = performance.measure(
+		"processParsedRoomData",
+		"processParsedRoomData-start",
+		"processParsedRoomData-end",
+	);
+	console.debug(
+		`Processing parsed room data took ${Math.round(processParsedRoomDataMeasure.duration)}ms`,
+	);
+
+	return {
+		errorCount,
+		roomsWithErrors,
+		emptyTimetableCount,
+		freeTimesCount,
+		timetableCount,
+		freeRoomTable,
+	};
 };
 
 const fetchRoomData = async (room: string) => {
@@ -160,12 +282,24 @@ const fetchRoomData = async (room: string) => {
 		}),
 	});
 
+	if (!roomResp.ok) {
+		console.error(`Failed to fetch room data for ${room}`);
+		return {
+			error: true,
+			empty: false,
+			freeTimes: {},
+			date: "",
+			room: room,
+			week: "",
+		};
+	}
+
 	const roomText = await roomResp.text();
 	const roomDoc = new DOMParser().parseFromString(roomText, "text/html");
 	console.debug(roomDoc);
 
 	console.debug(`Finding free rooms in the week for room ${room}`);
-	parseRoomDoc(roomDoc);
+	const parsedTimetableState = parseRoomDoc(roomDoc);
 
 	performance.mark("fetchRoomData-end");
 	const fetchRoomDataMeasure = performance.measure(
@@ -176,6 +310,8 @@ const fetchRoomData = async (room: string) => {
 	console.debug(
 		`Fetching room data for ${room} took ${Math.round(fetchRoomDataMeasure.duration)}ms`,
 	);
+
+	return parsedTimetableState;
 };
 
 const parseRoomDoc = (roomDoc: Document) => {
@@ -285,23 +421,17 @@ const parseRoomDoc = (roomDoc: Document) => {
 
 	return timetableState;
 };
-
-let initDataPromise: Promise<void>;
-
-onMount(() => {
-	initDataPromise = fetchInitData();
-});
 </script>
 
 <main>
   <img src={appLogo} class="logo" alt="Free WIT Rooms Logo" />
   <h1>Free WIT Rooms</h1>
-  <p class="tagline">
+  <p class="muted-text">
     Check which WIT rooms are free during the week.
   </p>
 
   {#await initDataPromise}
-    <p class="small-grey-text">Fetching initial data... (this might take a while)</p>
+    <p class="small-text muted-text">Fetching initial data... (this might take a while)</p>
     <Spinner />
   {:then}
     <form on:submit|preventDefault={handleForm}>
@@ -326,12 +456,72 @@ onMount(() => {
           </div>
         </div>
       </fieldset>
-      <p class="small-grey-text">(Fetching initial data took {roundedFetchInitDataDuration}ms)</p>
+      <p class="small-text muted-text">(Fetching initial data took {roundedFetchInitDataDuration}ms)</p>
       {#await formPromise}
-        <p class="small-grey-text">Finding free rooms... (this might take a while)</p>
+        <p class="small-text muted-text">Finding free rooms... (this might take a while)</p>
         <Spinner />
-      {:then}
+      {:then formPromiseData}
         <button type="submit">Find Free Rooms</button>
+		{#if processedRoomData}
+			<div class="table-wrapper">
+				<table>
+					<thead>
+						<tr>
+							<th></th>
+							<th>Error(s)</th>
+							<th>Timeout(s)</th>
+							<th>Empty Timetable(s)</th>
+							<th>Timetable(s)</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<th></th>
+							<td>{processedRoomData.errorCount}</td>
+							<td>{formPromiseData.filter(roomPromise => roomPromise.status === "rejected").length}</td>
+							<td>{processedRoomData.emptyTimetableCount}</td>
+							<td>{processedRoomData.timetableCount}</td>
+						</tr>
+						<tr>
+							<th>Rooms Checked</th>
+							<td colSpan="5">{roomsToCheck.join(", ")}</td>
+						</tr>
+						<tr>
+							<th>Rooms with Error(s)</th>
+							<td colSpan="5">{processedRoomData.roomsWithErrors.join(", ")}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			{#if processedRoomData.freeRoomTable}
+				<div class="table-wrapper">
+					<table>
+						<thead>
+							<tr>
+								<th></th>
+								{#each days as day}
+									<th>{day}</th>
+								{/each}
+							</tr>
+						</thead>
+						<tbody>
+							{#each times as time}
+								<tr>
+									<th>{time}</th>
+									{#each days as day}
+										<td>
+											{#if processedRoomData.freeRoomTable?.[day]?.[time]}
+												{processedRoomData.freeRoomTable[day][time].join(", ")}
+											{/if}
+										</td>
+									{/each}
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			{/if}
+		{/if}
       {:catch error}
         <p class="error">{error.message}</p>
       {/await}
@@ -356,9 +546,6 @@ onMount(() => {
   h1 {
     margin: 0;
   }
-  .tagline {
-    color: var(--half-dark);
-  }
   main {
     display: flex;
     flex-direction: column;
@@ -372,15 +559,16 @@ onMount(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
+	width: 100%;
   }
   fieldset {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 12px 0px 0px 0px;
+    margin: 6px 0px 0px 0px;
     width: fit-content;
     border-radius: 5px;
-    border-color: var(--half-dark);
+    border-color: var(--table-border);
   }
   #fields {
     display: flex;
@@ -395,13 +583,46 @@ onMount(() => {
   }
   #fields #room {
     margin-left: 0.5em;
-    max-width: 5em;
+    max-width: 10em;
   }
-  .small-grey-text {
-    color: var(--half-dark);
+  .muted-text {
+	color: var(--more-muted-primary);
+  }
+  .small-text {
     font-size: 0.8em;
   }
   button[type="submit"] {
-    margin-top: 24px;
+    margin: 16px;
+	margin-bottom: 32px;
+  }
+  .table-wrapper {
+	/* display: flex;
+    flex-direction: row;
+    justify-content: center; */
+	max-width: 100%;
+    overflow-x: auto;
+  }
+  table {
+  border-collapse: collapse;
+  border: 2px solid var(--table-border);
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  margin: 1em 0em;
+  }
+  td, th {
+    border: 1px solid var(--table-border);
+    padding: 10px 20px;
+  }
+  th {
+    background-color: var(--tertiary-background);
+  }
+  td {
+    text-align: center;
+  }
+  tr:nth-child(even) td {
+    background-color: var(--secondary-background);
+  }
+  tr:nth-child(odd) td {
+    background-color: var(--secondary-background);
   }
 </style>
