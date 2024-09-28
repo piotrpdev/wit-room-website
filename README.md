@@ -1,6 +1,17 @@
+<!-- markdownlint-configure-file {
+  "MD033": false,
+  "MD041": false
+} -->
+
+<div align="center">
+
 # WIT Room Website
 
-TODO
+_**Check which WIT rooms are free during the week.**_
+
+![demo][demo]
+
+</div>
 
 ## License
 
@@ -15,6 +26,7 @@ Made using the following resources:
 | [Spinner][loaders]            | MIT               |
 | [Table Styles][table]         | CC0-1.0           |
 
+[demo]: ./.github/img/demo.png
 [license]: ./LICENSE
 [favicon]: https://uxwing.com/door-close-color-icon/
 [template]: https://github.com/vite-pwa/create-pwa/tree/2b9325ed8b3dca2a692ed4ff030e7d2e84c7dae8/templates/template-svelte-ts
