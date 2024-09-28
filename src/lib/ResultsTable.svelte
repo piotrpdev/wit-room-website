@@ -13,9 +13,11 @@ export let processedRoomData: ProcessedRoomData;
 export let formPromiseData: TimetableState[];
 export let roomsToCheck: string[];
 
-// let currentDate = new Date();
-// TODO: Change this
-let currentDate = new Date("2024-09-26T11:20:00");
+let currentDate = new Date();
+
+// For testing
+// let currentDate = new Date("2024-09-26T11:20:00");
+
 function updateDate() {
 	const newDate = new Date();
 	if (newDate.getMinutes() - currentDate.getMinutes() >= 10) {
