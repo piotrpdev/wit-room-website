@@ -87,6 +87,14 @@ button[type="submit"] {
 	margin-bottom: 32px;
 }
 
+.table-wrapper {
+	/* display: flex;
+    flex-direction: row;
+    justify-content: center; */
+	max-width: 100%;
+	overflow-x: auto;
+}
+
 table {
 	border-collapse: collapse;
 	border: 2px solid var(--table-border);

@@ -114,13 +114,6 @@ onDestroy(() => {
 	display: none;
 	margin-bottom: 6px;
   }
-  .table-wrapper {
-	/* display: flex;
-    flex-direction: row;
-    justify-content: center; */
-	max-width: 100%;
-    overflow-x: auto;
-  }
   td.closestTime {
 	border: var(--table-border-highlight) solid 2px;
   }
